@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# ePub Genre Finder
 
-# Run and deploy your AI Studio app
+ePub Genre Finder is a client-side web application that analyzes the content of an `.epub` file to determine its most likely genre and associated tags. It works by scanning the text for keyword occurrences and scoring them against predefined lists for various categories.
 
-This contains everything you need to run your app locally.
+## How It Works
 
-View your app in AI Studio: https://ai.studio/apps/drive/1QekJFXyQzuNZEnFQRTJ49IvXuqTSAvOV
+The entire analysis process happens locally in your web browser. No files are ever uploaded to a server, ensuring your privacy.
 
-## Run Locally
+1.  **File Unpacking**: When you upload an `.epub` file (which is essentially a ZIP archive), the application uses the `JSZip` library to read its contents in memory.
+2.  **Content Parsing**: It first reads `META-INF/container.xml` to find the main `.opf` content file. The `.opf` file contains the book's manifest (a list of all files) and spine (the required reading order).
+3.  **Text Extraction**: The application reads all XHTML/HTML files listed in the spine, parses the HTML to strip out tags, and concatenates the plain text content into a single block.
+4.  **Keyword Analysis**: This block of text is then scanned for keywords defined for various genres (e.g., Fantasy, Sci-Fi) and tags (e.g., Magic System, Kingdom Building). The number of hits for each keyword is counted.
+5.  **Scoring & Display**: The results are scored based on the total number of keyword hits for each category. The application then displays a ranked list of genres and tags, along with the specific keywords that were found.
 
-**Prerequisites:**  Node.js
+## Features
 
+-   **Drag & Drop or Click to Upload**: Easily select an `.epub` file from your computer.
+-   **Client-Side Processing**: Fast, secure, and private analysis performed entirely in your browser.
+-   **Detailed Genre Analysis**: See a ranked list of potential genres with hit counts.
+-   **Tag Detection**: Discover specific tropes and themes present in the book.
+-   **Keyword Breakdown**: View the top contributing keywords for each genre and tag.
+-   **Overall Keyword Hits**: See a list of the most frequent keywords found across all categories.
+-   **Responsive Design**: Works on both desktop and mobile devices.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## How to Use
+
+1.  Open the web application in your browser.
+2.  Drag and drop an `.epub` file onto the upload area, or click the area to open a file selector.
+3.  Once a file is selected, click the "Analyze Genre" button.
+4.  Wait for the analysis to complete. The results will appear below the button.
+
+## Technology Stack
+
+-   **Frontend**: [React](https://reactjs.org/)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **ePub Unpacking**: [JSZip](https://stuk.github.io/jszip/)

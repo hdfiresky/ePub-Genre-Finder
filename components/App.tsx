@@ -5,6 +5,12 @@ import { epubProcessor } from '../services/epubProcessor';
 import { ProcessingState, GenreResult, TagResult, KeywordHit } from '../types';
 import { ExclamationCircleIcon } from './Icons';
 
+/**
+ * The main application component. It manages the application's state,
+ * including the selected file, processing status, and analysis results.
+ * It orchestrates the UI and handles the entire analysis workflow.
+ * @returns {React.FC} The rendered App component.
+ */
 const App: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState>(ProcessingState.IDLE);
@@ -13,6 +19,11 @@ const App: React.FC = () => {
   const [tagResults, setTagResults] = useState<TagResult[]>([]);
   const [allHits, setAllHits] = useState<KeywordHit[]>([]);
   
+  /**
+   * Resets the analysis-related state to its initial default values.
+   * This is used to clear previous results when a new file is selected or before a new analysis begins.
+   * Encapsulated in useCallback to ensure the function reference is stable across re-renders.
+   */
   const resetState = useCallback(() => {
     setProcessingState(ProcessingState.IDLE);
     setStatusMessage('');
@@ -21,11 +32,21 @@ const App: React.FC = () => {
     setAllHits([]);
   }, []);
 
+  /**
+   * Handles the selection of a new file from the FileUpload component.
+   * It updates the file state and resets all other state variables to prepare for a new analysis.
+   * @param {File} selectedFile The file chosen by the user.
+   */
   const handleFileSelect = useCallback((selectedFile: File) => {
     setFile(selectedFile);
     resetState();
   }, [resetState]);
 
+  /**
+   * Initiates the ePub file analysis process.
+   * This function is triggered by the "Analyze Genre" button. It handles setting the loading state,
+   * invoking the epubProcessor service, and updating the state with either the successful results or an error message.
+   */
   const handleProcess = useCallback(async () => {
     if (!file) {
       setStatusMessage('Please select an ePub file to analyze.');
@@ -33,6 +54,7 @@ const App: React.FC = () => {
       return;
     }
 
+    // Set the app to a processing state and provide feedback to the user.
     setProcessingState(ProcessingState.PROCESSING);
     setStatusMessage('Analyzing ePub... this may take a moment.');
     setGenreResults([]);
@@ -40,6 +62,7 @@ const App: React.FC = () => {
     setAllHits([]);
 
     try {
+      // The core analysis is delegated to the epubProcessor service.
       const results = await epubProcessor.analyze(file);
       setGenreResults(results.genres);
       setTagResults(results.tags);
@@ -54,8 +77,10 @@ const App: React.FC = () => {
     }
   }, [file]);
   
+  // Calculate top scores for normalizing progress bar widths.
   const topGenreScore = genreResults.length > 0 ? genreResults[0].score : 0;
   const topTagScore = tagResults.length > 0 ? tagResults[0].score : 0;
+  // Calculate total score to check if any keywords were found at all.
   const totalScore = genreResults.reduce((sum, result) => sum + result.score, 0) + tagResults.reduce((sum, result) => sum + result.score, 0);
 
   return (
@@ -92,6 +117,7 @@ const App: React.FC = () => {
             </button>
           </div>
           
+          {/* Display status or error messages, but not on success, as results are shown instead. */}
           {(statusMessage && processingState !== ProcessingState.SUCCESS) && (
             <div className={`mt-4 p-4 rounded-md text-sm ${
               processingState === ProcessingState.ERROR ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800'
@@ -103,8 +129,10 @@ const App: React.FC = () => {
             </div>
           )}
 
+          {/* This block renders the analysis results only when processing is successful. */}
           {processingState === ProcessingState.SUCCESS && (
              <div className="mt-4 divide-y divide-gray-200">
+                 {/* Genre results section */}
                  {genreResults.filter(r => r.score > 0).length > 0 && (
                     <div className="py-6">
                         <h3 className="text-xl font-semibold text-gray-700 mb-4">Genre Analysis</h3>
@@ -116,9 +144,11 @@ const App: React.FC = () => {
                                        <span className="text-sm font-medium text-indigo-700">{result.score} hits</span>
                                    </div>
                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                       {/* The width of the bar is relative to the top-scoring genre. */}
                                        <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${topGenreScore > 0 ? (result.score / topGenreScore) * 100 : 0}%` }}></div>
                                    </div>
                                    <div className="mt-2 flex flex-wrap gap-1">
+                                       {/* Display top 5 keywords for this genre */}
                                        {Object.entries(result.hits)
                                            .sort(([, countA], [, countB]) => countB - countA)
                                            .slice(0, 5)
@@ -135,6 +165,7 @@ const App: React.FC = () => {
                     </div>
                  )}
 
+                 {/* Tags results section */}
                  {tagResults.filter(t => t.score > 0).length > 0 && (
                     <div className="py-6">
                         <h3 className="text-xl font-semibold text-gray-700 mb-4">Detected Tags</h3>
@@ -146,9 +177,11 @@ const App: React.FC = () => {
                                        <span className="text-sm font-medium text-indigo-700">{result.score} hits</span>
                                    </div>
                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                       {/* The width of the bar is relative to the top-scoring tag. */}
                                        <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${topTagScore > 0 ? (result.score / topTagScore) * 100 : 0}%` }}></div>
                                    </div>
                                    <div className="mt-2 flex flex-wrap gap-1">
+                                       {/* Display top 5 keywords for this tag */}
                                        {Object.entries(result.hits)
                                            .sort(([, countA], [, countB]) => countB - countA)
                                            .slice(0, 5)
@@ -164,7 +197,8 @@ const App: React.FC = () => {
                         </div>
                     </div>
                  )}
-
+                 
+                 {/* Overall keyword hits section */}
                  {allHits.length > 0 && (
                     <div className="py-6">
                         <h3 className="text-xl font-semibold text-gray-700 mb-4">Overall Top 50 Keyword Hits</h3>
@@ -179,6 +213,7 @@ const App: React.FC = () => {
                     </div>
                  )}
 
+                 {/* Fallback message if analysis is complete but no keywords were found. */}
                  {totalScore === 0 && (
                      <div className="py-6">
                          <div className="p-4 rounded-md text-sm bg-yellow-50 text-yellow-800">
