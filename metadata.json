@@ -1,0 +1,5 @@
+{
+  "name": "ePub Genre Finder",
+  "description": "An application to analyze an ePub file's content and determine its most likely genre based on keyword occurrences.",
+  "requestFramePermissions": []
+}
