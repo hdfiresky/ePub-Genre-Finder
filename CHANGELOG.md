@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.1.0...v0.1.1) (2025-08-17)
+
+
+### Bug Fixes
+
+* package.lock ([48a0679](https://github.com/hdfiresky/Problembuddy-deploy/commit/48a06792b7dee55c2f51c804dc16396d7ef2129f))
+
 ## 0.1.0 (2025-08-17)
 
 
